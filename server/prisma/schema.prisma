@@ -24,12 +24,14 @@ model User {
 }
 
 model Image {
-  id       String @id @default(uuid())
-  url      String
-  key      String
-  userId   Int
-  user     User   @relation(fields: [userId], references: [id])
-  metadata Json   @default("{}")
+  id        String   @id @default(uuid())
+  url       String
+  key       String
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  metadata  Json     @default("{}")
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
 
   transformImages TransformImage[]
 }
@@ -41,4 +43,6 @@ model TransformImage {
   key      String
   url      String
   metadata Json   @default("{}")
+
+  createdAt DateTime @default(now())
 }
