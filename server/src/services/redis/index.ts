@@ -8,7 +8,7 @@ redisClient.on("error", (err) => console.error("Redis Client Error", err));
 redisClient.on("reconnecting", () => console.log("Redis client reconnecting"));
 redisClient.on("connect", () => console.log("Redis client connected"));
 
-async function connectRedis() {
+(async function connectRedis() {
   try {
     if (!redisClient.isOpen) {
       await redisClient.connect();
@@ -17,8 +17,6 @@ async function connectRedis() {
   } catch (error) {
     console.error("Error connecting to Redis:", error);
   }
-}
-
-connectRedis();
+})()
 
 export { redisClient };
