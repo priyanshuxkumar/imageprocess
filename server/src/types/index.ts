@@ -35,7 +35,7 @@ export const TransformImageSchema = z.object({
                 b: z.number().default(0),
                 alpha: z.number().default(0),
             }).default({ r: 0, g: 0, b: 0, alpha: 0 }),
-    }),
+    }).optional(),
     blur: z.number().optional(),
     filters: z.object({
         grayscale: z.boolean(),
