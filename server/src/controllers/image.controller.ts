@@ -73,11 +73,13 @@ const transformImage = async (req: Request, res: Response) => {
   const imageId = req.params.id;
   const body = req.body;
 
-  const parsedData = TransformImageSchema.safeParse(body);
-  if (!parsedData.success) {
-    res.status(400).json({ message: parsedData.error.message ?? "Invalid request" });
+  // Parsing the body with zod
+  const parsedbody = TransformImageSchema.safeParse(body);
+  if (!parsedbody.success) {
+    res.status(400).json({ message: parsedbody.error.message ?? "Invalid request" });
     return;
   }
+
   try {
     let imageBuffer;
     let image;
@@ -126,7 +128,7 @@ const transformImage = async (req: Request, res: Response) => {
     let sharpInstance = sharp(redisBuffer ?? imageBuffer);
 
     /** Calling the image transform fn with sharp instance with transform payload */
-    const output = await transform(sharpInstance, body);
+    const output = await transform(sharpInstance, parsedbody.data);
 
     let outputFormat = image?.key?.split(".").pop() || "jpeg";
     const transformedKey = `transformed/${Date.now()}_${image?.key.split("/").pop()}`;
@@ -250,11 +252,13 @@ const getAllImages =  async(req: Request, res: Response) => {
 const getTransformedImages = async (req: Request, res: Response) => {
  try {
    const imageId = req.params.id;
+   /** Check if the transform images are cached on redis */
    const cacheData = await redisClient.get(`imageIdToTransformImages:${imageId}`);
    if(cacheData) {
     res.status(200).json(JSON.parse(cacheData));
     return;
    }
+
    const images : TransformImage[] = await prisma.transformImage.findMany({
     where : {
       imageId,
@@ -263,7 +267,9 @@ const getTransformedImages = async (req: Request, res: Response) => {
       }
     }
    })
+   /** Cache the transform images on redis */
    await redisClient.set(`imageIdToTransformImages:${imageId}`,JSON.stringify(images));
+
    res.status(200).json(images);
  } catch (error) {
    if(error instanceof PrismaClientValidationError) {
@@ -317,4 +323,11 @@ const destroyImage = async (req: Request, res: Response) => {
 }
 
 
-export { uploadImage, transformImage, getImageById, getAllImages, getTransformedImages, destroyImage };
+export {
+  uploadImage,
+  transformImage,
+  getImageById,
+  getAllImages,
+  getTransformedImages,
+  destroyImage,
+};

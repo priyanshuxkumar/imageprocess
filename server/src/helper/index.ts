@@ -50,6 +50,24 @@ async function transform(sharpInstance: any, body: any) {
         }
       }
     }
+    
+    if (body.rotate) {
+      try {
+        sharpInstance = await sharpInstance.rotate(body.rotate.angle, {// body.rotate is angle of rotation
+          background: { r: 0, g: 0, b: 0, alpha: 0 }, // background of roatetd image by default is black
+        }); 
+      } catch (error) {
+        console.log("error rotate fn", error);
+      }
+    }
+
+    if(body.blur) {
+      try {
+        sharpInstance = await sharpInstance.blur(body.blur);
+      } catch (error) {
+        console.log("error blur fn", error);
+      }
+    }
 
     if (body.filters) {
       if (body.filters.grayscale) {
